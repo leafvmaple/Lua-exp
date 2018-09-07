@@ -76,13 +76,13 @@ typedef struct GCObject GCObject;
 ** Common Header for all collectable objects (in macro form, to be
 ** included in other objects)
 */
-#define CommonHeader	GCObject *next; lu_byte tt; lu_byte marked /*8Byte*/
+#define CommonHeader	GCObject *next; lu_byte tt; lu_byte marked /*6Byte*/
 
 
 /*
 ** Common type has only the common header
 */
-struct GCObject {
+struct GCObject { /*8Byte*/
     CommonHeader;
 };
 
@@ -107,11 +107,11 @@ typedef union Value { /*8Byte*/
 } Value;
 
 
-#define TValuefields	Value value_; int tt_ /*Data structure alignment,16Byte*/
+#define TValuefields	Value value_; int tt_ /*12Byte*/
 
 
 typedef struct lua_TValue { /*16Byte*/
-    TValuefields;
+    TValuefields; /*12Byte*/
 } TValue;
 
 
@@ -301,11 +301,11 @@ typedef TValue *StkId;  /* index to stack elements */
 ** (aligned according to 'UTString'; see next).
 */
 typedef struct TString { /*16Byte*/
-    CommonHeader; /*8Byte*/
-    lu_byte extra; /*1Byte*/ /* reserved words for short strings; "has hash" for longs */
+    CommonHeader;   /*6Byte*/
+    lu_byte extra;  /*1Byte*/ /* reserved words for short strings; "has hash" for longs */
     lu_byte shrlen; /*1Byte*/ /* length for short strings */
     unsigned int hash; /*4Byte*/
-    union { /*4Byte*/
+    union {            /*4Byte*/
         size_t lnglen;  /* length for long strings */
         struct TString *hnext;  /* linked list for hash table */
     } u;
@@ -343,12 +343,12 @@ typedef union UTString { /*16Byte*/
 ** Header for userdata; memory area follows the end of this structure
 ** (aligned according to 'UUdata'; see next).
 */
-typedef struct Udata {
-    CommonHeader;
-    lu_byte ttuv_;  /* user value's tag */
-    struct Table *metatable;
-    size_t len;  /* number of bytes */
-    union Value user_;  /* user value */
+typedef struct Udata { /*24Byte*/
+    CommonHeader;   /*6Byte*/
+    lu_byte ttuv_;  /*1Byte*/ /* user value's tag */
+    struct Table *metatable; /*4Byte*/
+    size_t len;     /*4Byte*/ /* number of bytes */
+    union Value user_;  /*8Byte*/ /* user value */
 } Udata;
 
 
@@ -472,10 +472,10 @@ typedef union Closure {
 ** Tables
 */
 
-typedef union TKey {
+typedef union TKey {  /*16Byte*/
     struct {
-        TValuefields;
-        int next;  /* for chaining (offset for next node) */
+        TValuefields; /*12Byte*/
+        int next;     /*4Byte*/ /* for chaining (offset for next node) */
     } nk;
     TValue tvk;
 } TKey;
@@ -488,22 +488,22 @@ typedef union TKey {
     (void)L; checkliveness(L,io_); }
 
 
-typedef struct Node {
-    TValue i_val;
-    TKey i_key;
+typedef struct Node { /*32Byte*/
+    TValue i_val; /*16Byte*/
+    TKey i_key;   /*16Byte*/
 } Node;
 
 
-typedef struct Table {
-    CommonHeader;
-    lu_byte flags;  /* 1<<p means tagmethod(p) is not present */
-    lu_byte lsizenode;  /* log2 of size of 'node' array */
-    unsigned int sizearray;  /* size of 'array' array */
-    TValue *array;  /* array part */
-    Node *node;
-    Node *lastfree;  /* any free position is before this position */
-    struct Table *metatable;
-    GCObject *gclist;
+typedef struct Table { /*32Byte*/
+    CommonHeader;      /*6Byte*/
+    lu_byte flags;     /*1Byte*/ /* 1<<p means tagmethod(p) is not present */
+    lu_byte lsizenode; /*1Byte*/ /* log2 of size of 'node' array */
+    unsigned int sizearray; /*4Byte*/  /* size of 'array' array */
+    TValue *array;          /*4Byte*/ /* array part */
+    Node *node;             /*4Byte*/
+    Node *lastfree;         /*4Byte*/ /* any free position is before this position */
+    struct Table *metatable; /*4Byte*/
+    GCObject *gclist;        /*4Byte*/
 } Table;
 
 

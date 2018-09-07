@@ -602,7 +602,7 @@ int main (int argc, char **argv) {
         l_message(argv[0], "cannot create state: not enough memory");
         return EXIT_FAILURE;
     }
-    printf("%u %u %u\n", sizeof(UTString), sizeof(TString), sizeof(GCObject));
+    printf("%u %u %u\n", sizeof(Table), sizeof(Node), sizeof(TKey));
     lua_pushcfunction(L, &pmain);  /* to call 'pmain' in protected mode */
     lua_pushinteger(L, argc);  /* 1st argument */
     lua_pushlightuserdata(L, argv); /* 2nd argument */
